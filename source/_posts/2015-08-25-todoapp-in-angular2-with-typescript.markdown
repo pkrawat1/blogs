@@ -10,7 +10,7 @@ In this post I'll be sharing my experience during the application setup.
 I'll be creating an application from scratch, right from creating application folder.
 
 #Let's get started
-###First thing first, create a the app folder
+###First thing first, create an app folder
 ```bash
   $ mkdir todoapp
   $ cd todoapp
