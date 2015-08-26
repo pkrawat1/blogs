@@ -97,7 +97,7 @@ disqus_short_name: pkrawat1
 disqus_show_comment_count: false
 
 # Google Analytics
-google_analytics_tracking_id:
+google_analytics_tracking_id: UA-66794290-1
 
 # Facebook Like
 facebook_like: true
