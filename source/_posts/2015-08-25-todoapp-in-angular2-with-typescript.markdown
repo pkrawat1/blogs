@@ -9,8 +9,7 @@ categories: ['Angular2', 'TypeScript']
 In this post I'll be sharing my experience during the application setup.
 I'll be creating an application from scratch, right from creating application folder.
 
-#Let's get started, Hurrrrayyy!!!
-
+#Let's get started
 ###First thing first, create a the app folder
 ```bash
   $ mkdir todoapp
@@ -251,6 +250,8 @@ The code is self explanatory here if not head over to [angular.io](https://angul
 ```
 
 >For starting a local server, just install `npm install http-server`
+
+#Hurrrrayyy!!!
 
 If everything goes right you should see the list of tasks with an input box in the browser when you go to [http://localhost:8080](http://localhost:8080).
 
