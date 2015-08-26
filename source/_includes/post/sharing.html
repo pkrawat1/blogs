@@ -1,11 +1,11 @@
 <div class="sharing">
   {% if site.twitter_tweet_button %}
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="{{ site.url }}{{ page.url }}" data-via="{{ site.twitter_user }}" data-counturl="{{ site.url }}{{ page.url }}" >Tweet</a>
+  <a href="https://twitter.com/intent/tweet?text={{ page.description }} via @{{ site.twitter_user }}&url={{ site.url }}{{ page.url }}" class="btn btn-default btn-fab btn-raised shadow-z-1 btn-material-light-blue"><i class="fa fa-twitter"></i></a>
   {% endif %}
-  {% if site.google_plus_one %}
-  <div class="g-plusone" data-size="{{ site.google_plus_one_size }}"></div>
+  {% if site.facebook_share %}
+  <a href="https://www.facebook.com/sharer/sharer.php?u={{ site.url }}{{ page.url }}" class="btn btn-default btn-fab btn-raised shadow-z-1 btn-material-blue-900"><i class="fa fa-facebook"></i></a>
   {% endif %}
-  {% if site.facebook_like %}
-    <div class="fb-like" data-send="true" data-width="450" data-show-faces="false"></div>
+  {% if site.google_plus_share %}
+  <a href="https://plus.google.com/share?url={{ site.url }}{{ page.url }}" class="btn btn-default btn-fab btn-raised shadow-z-1 btn-material-red"><i class="fa fa-google-plus"></i></a>
   {% endif %}
 </div>
