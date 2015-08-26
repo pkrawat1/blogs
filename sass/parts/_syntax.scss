@@ -95,6 +95,7 @@ figure.code{
 		}
 	}
 	code, pre{
+		font-size: 0.9em;
 		background: none;
 		border: none;
 		padding: 0;
@@ -139,9 +140,9 @@ figure.code{
 			background: none;
 			border: none;
 			pre{
-				font: $font-mono;
-				line-height: inherit;
-				text-align: left;
+				font: 0.9em $font-mono;
+				line-height: 1.5;
+        text-align: left;
 			}
 		}
 		.gist-meta{
