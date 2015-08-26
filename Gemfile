@@ -15,8 +15,4 @@ group :development do
   gem 'stringex', '~> 1.4.0'
 end
 
-group :jekyll_plugins do
-  gem 'octopress-genesis-theme'
-end
-
 gem 'sinatra', '~> 1.4.2'
