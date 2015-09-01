@@ -227,6 +227,7 @@ The code is self explanatory here if not head over to [angular.io](https://angul
 
 ```html
 <!doctype html>
+<!doctype html>
 <html>
   <head>
     <title>Angular 2 Todo App</title>
@@ -237,19 +238,24 @@ The code is self explanatory here if not head over to [angular.io](https://angul
     -->
     <script src="node_modules/traceur/bin/traceur-runtime.js"></script>
     <script src="node_modules/systemjs/dist/system.js"></script>
-    <script src="node_modules/angular2/bundles/angular2.dev.js"></script>
+    <script src="node_modules/angular2/bundles/angular2.min.js"></script>
   </head>
   <body>
     <script>
-      System.import('app');
+      System.import('app.js');
     </script>
     <todo-app></todo-app>
   </body>
 </html>
 
+
 ```
 
->For starting a local server, just install `npm install http-server`
+###For starting a local server
+```bash
+npm install http-server
+http-server -c-1 # to disable cache
+```
 
 #Hurrrrayyy!!!
 
