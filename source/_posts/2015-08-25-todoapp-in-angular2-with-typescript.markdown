@@ -133,52 +133,52 @@ Once installed we can use tsc for transpiling ts to js.
 First we will be creating a file called app.js, that was included in tsconfig.json.
 
 ```javascript app.ts
-/// <reference path="typings/angular2/angular2.d.ts" />
-
-import {Component, View, bootstrap, NgFor, NgIf} from "angular2/angular2";
-
-@Component({
-  selector: 'todo-app'
-})
-
-@View({
-  template: `
-    <h2>
-      <ul>
-        <li *ng-for="#todo of todos">
-          {{ todo }}
-        </li>
-      </ul>
-
-      <input #todotext (keyup)="doneTyping($event)">
-      <button (click)="addTodo(todotext.value, $event)">Add Todo</button>
-    </h2>
-  `,
-  directives: [NgFor, NgIf]
-})
-
-class TodoApp {
-  todos: Array<string>;
+  /// <reference path="typings/angular2/angular2.d.ts" />
   
-  constructor() {
-    this.todos = ["Eat Breakfast", "Walk Dog", "Breathe"];
-  }
-
-  addTodo(todo: string) {
-    this.todos.push(todo);
-  }
-
-  doneTyping($event) {
-    console.log($event.which);
+  import {Component, View, bootstrap, NgFor, NgIf} from "angular2/angular2";
+  
+  @Component({
+    selector: 'todo-app'
+  })
+  
+  @View({
+    template: `
+      <h2>
+        <ul>
+          <li *ng-for="#todo of todos">
+            {{ todo }}
+          </li>
+        </ul>
+  
+        <input #todotext (keyup)="doneTyping($event)">
+        <button (click)="addTodo(todotext.value, $event)">Add Todo</button>
+      </h2>
+    `,
+    directives: [NgFor, NgIf]
+  })
+  
+  class TodoApp {
+    todos: Array<string>;
     
-    if($event.which === 13) {
-      this.addTodo($event.target.value);
-      $event.target.value = null;
+    constructor() {
+      this.todos = ["Eat Breakfast", "Walk Dog", "Breathe"];
+    }
+  
+    addTodo(todo: string) {
+      this.todos.push(todo);
+    }
+  
+    doneTyping($event) {
+      console.log($event.which);
+      
+      if($event.which === 13) {
+        this.addTodo($event.target.value);
+        $event.target.value = null;
+      }
     }
   }
-}
-
-bootstrap(TodoApp);
+  
+  bootstrap(TodoApp);
 ```
 > For details on the code please visit these [step by step guides](https://angular.io/docs/js/latest/guide/).
 
@@ -190,35 +190,35 @@ Or by `npm install angular2 traceur systemjs`, whichever suits you.
 3. SystemJs is univerval dynamic module loader.
 
 ```javascript package.json
-{
-  "name": "todoapp",
-  "version": "1.0.0",
-  "description": "Todo App in Angularjs 2",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pkrawat1/todoapp.git"
-  },
-  "author": "Pankaj Kumar Rawat",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/pkrawat1/todoapp/issues"
-  },
-  "homepage": "https://github.com/pkrawat1/todoapp#readme",
-  "keywords": [
-    "angular2",
-    "typescript",
-    "tds"
-  ],
-  "dependencies": {
-    "angular2": "latest",
-    "systemjs": "latest",
-    "traceur": "latest"
+  {
+    "name": "todoapp",
+    "version": "1.0.0",
+    "description": "Todo App in Angularjs 2",
+    "main": "app.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/pkrawat1/todoapp.git"
+    },
+    "author": "Pankaj Kumar Rawat",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/pkrawat1/todoapp/issues"
+    },
+    "homepage": "https://github.com/pkrawat1/todoapp#readme",
+    "keywords": [
+      "angular2",
+      "typescript",
+      "tds"
+    ],
+    "dependencies": {
+      "angular2": "latest",
+      "systemjs": "latest",
+      "traceur": "latest"
+    }
   }
-}
 
 ```
 
@@ -226,35 +226,35 @@ In order to use these components we need to create an index.html file.
 The code is self explanatory here if not head over to [angular.io](https://angular.io/docs/js/latest/guide/) they have very good explanations up on their websites.
 
 ```html
-<!doctype html>
-<!doctype html>
-<html>
-  <head>
-    <title>Angular 2 Todo App</title>
-    <!--
-    <script src="https://github.jspm.io/jmcriffey/bower-traceur-runtime@0.0.87/traceur-runtime.js"></script>
-    <script src="https://jspm.io/system@0.16.js"></script>
-    <script src="https://code.angularjs.org/2.0.0-alpha.28/angular2.dev.js"></script>
-    -->
-    <script src="node_modules/traceur/bin/traceur-runtime.js"></script>
-    <script src="node_modules/systemjs/dist/system.js"></script>
-    <script src="node_modules/angular2/bundles/angular2.min.js"></script>
-  </head>
-  <body>
-    <script>
-      System.import('app.js');
-    </script>
-    <todo-app></todo-app>
-  </body>
-</html>
-
+  <!doctype html>
+  <!doctype html>
+  <html>
+    <head>
+      <title>Angular 2 Todo App</title>
+      <!--
+      <script src="https://github.jspm.io/jmcriffey/bower-traceur-runtime@0.0.87/traceur-runtime.js"></script>
+      <script src="https://jspm.io/system@0.16.js"></script>
+      <script src="https://code.angularjs.org/2.0.0-alpha.28/angular2.dev.js"></script>
+      -->
+      <script src="node_modules/traceur/bin/traceur-runtime.js"></script>
+      <script src="node_modules/systemjs/dist/system.js"></script>
+      <script src="node_modules/angular2/bundles/angular2.min.js"></script>
+    </head>
+    <body>
+      <script>
+        System.import('app.js');
+      </script>
+      <todo-app></todo-app>
+    </body>
+  </html>
+  
 
 ```
 
 ###For starting a local server
 ```bash
-npm install http-server
-http-server -c-1 # to disable cache
+  npm install http-server
+  http-server -c-1 # to disable cache
 ```
 
 #Hurrrrayyy!!!
