@@ -7,7 +7,7 @@ categories: ['Angular2', 'TypeScript']
 ---
 
 >**Warning**: Angular is continuosly changing at this point.
->**Visit**: [Ecommerce App](https://github.com/pkrawat1/Rent-Junction-Angular2) for latest code in Angular2 Beta.
+>**Visit**: [Ecommerce App](https://goo.gl/BPGMVO) for latest code in Angular2 Beta.
 
 In this post I'll be sharing my experience during the application setup.
 I'll be creating an application from scratch, right from creating application folder.
