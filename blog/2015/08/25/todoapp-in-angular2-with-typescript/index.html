@@ -1,0 +1,781 @@
+<!doctype html>
+    <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+    <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+    <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+    <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+
+    
+      
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>TodoApp in Angular2 with TypeScript - Just Curiosity</title>
+        <meta name="author" content="Pankaj Kumar Rawat">
+        
+        <meta name="description" content="TodoApp in Angular2 with TypeScript Aug 25th, 2015 angular2 typescript Warning: Angular is continuosly changing at this point.
+Visit: Ecommerce App &hellip;">
+        
+        <meta name="viewport" content="width=device-width">
+        <link rel="canonical" href="http://pkrawat1.github.io/blogs/blog/2015/08/25/todoapp-in-angular2-with-typescript">
+
+        <link href='http://fonts.googleapis.com/css?family=Droid+Serif:400,400italic' rel='stylesheet' type='text/css'>
+        <link href="http://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet" type="text/css">
+
+        
+        <link href="/favicon.png" rel="icon">
+        <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet">
+        <link href="/atom.xml" rel="alternate" title="Just Curiosity" type="application/atom+xml">
+    </head>
+
+
+    <body >
+
+        <header id="header">
+    <div class="row">
+    <div class="col-xs-12 col-sm-8 col-md-4">
+        <a href="/" class="site-title">Just Curiosity</a>
+    </div>
+    <div class="col-xs-12 col-sm-4 col-md-8">
+        <nav>
+    <input type="checkbox" id="toggle">
+    <label for="toggle" class="toggle" data-open="Main Menu" data-close="Close Menu"></label>
+    <ul class="menu">
+    <li><a href="/">Home</a></li>
+    <li><a href="/blog/">Blog</a></li>
+</ul>
+
+</nav>
+
+    </div>
+</div>
+
+</header>
+
+
+        <div id="main-content">
+
+            <!--[if lte IE 9]>
+<div class="row upgrade-row">
+    <div class="col-lg-12">
+        <div class="upgrade">
+            <i class="upgrade__icon fa fa-warning"></i>
+            <h1 class="upgrade__title h6">Ohnoes!</h1>
+            <p class="upgrade__text">
+                Unfortunately, certain parts of this site may not display correctly in your version of Internet Explorer!<br>
+                If possible, you should consider <a href="http://browsehappy.com/">upgrading your browser</a>.
+            </p>
+        </div>
+    </div>
+</div>
+<!-- <![endif]-->
+
+
+            
+
+            <div class="row top-xs center-sm center-md center-lg site-wrapper">
+                
+                <div class="col-xs-12 col-sm-10 col-md-8 col-lg-8">
+                
+                    <article class="article article--single">
+    <header class="article__header">
+    
+        <h1 class="article__title">TodoApp in Angular2 with TypeScript</h1>
+    
+
+    
+        <div class="article__meta clearfix">
+            
+
+
+
+
+
+
+    <time class="article__date pull-left" datetime="2015-08-25T15:35:36+05:30" pubdate><i class="fa fa-calendar"></i> Aug 25th, 2015</time>
+
+
+
+
+            
+
+    <div class="article__tags pull-left">
+        <i class="fa fa-tags"></i>
+        <ul class="unstyled">
+        
+
+            
+                <li><a class='category' href='/blog/categories/angular2/'>angular2</a></li>
+            
+                <li><a class='category' href='/blog/categories/typescript/'>typescript</a></li>
+            
+        
+        </ul>
+    </div>
+
+
+            
+        </div>
+    
+</header>
+
+
+
+
+    <blockquote><p><strong>Warning</strong>: Angular is continuosly changing at this point.
+<strong>Visit</strong>: <a href="https://goo.gl/BPGMVO">Ecommerce App</a> for latest code in Angular2 Beta.</p></blockquote>
+
+<p>In this post I&rsquo;ll be sharing my experience during the application setup.
+I&rsquo;ll be creating an application from scratch, right from creating application folder.</p>
+
+<h1>Let&rsquo;s get started</h1>
+
+<h3>First thing first, create an application folder</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  <span class="nv">$ </span>mkdir todoapp
+</span><span class='line'>  <span class="nv">$ </span><span class="nb">cd </span>todoapp
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now we need to download typescript definition manager(tsd), just like npm(node package manager).
+You can install tsd with this simple command.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  <span class="nv">$ </span>npm install -g tsd  <span class="c">#use sudo if required</span>
+</span><span class='line'>  <span class="nv">$ </span>tsd --version <span class="c"># Validate installation by typing tsd in the console.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You can checkout some commands and how to use them in this <a href="https://www.npmjs.com/package/tsd">npm repo</a>.</p>
+
+<h3>Initializing the application</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  <span class="nv">$ </span>tsd init
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This generated the tsd.json file. Just like in case of npm package.json is created.
+Anyone who has the access to this repository can do a $ tsd reinstall , like npm install we all are so used to.</p>
+
+<h3>Let&rsquo;s install typescript libraries</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  <span class="nv">$ </span>tsd query angular2
+</span><span class='line'>    - angular2 / angular2
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&rsquo;s fetch angular2 from the definitely typed repo.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  <span class="nv">$ </span>tsd query angular2 --action install --save
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Doing this will create a directory called angular2 in the typings directory with a file called
+angular2.d.ts
+This will also update the tsd.json with current angular2 head sha.</p>
+
+<figure class='code'><figcaption><span>tsd.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;version&quot;</span><span class="o">:</span> <span class="s2">&quot;v4&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;repo&quot;</span><span class="o">:</span> <span class="s2">&quot;borisyankov/DefinitelyTyped&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;ref&quot;</span><span class="o">:</span> <span class="s2">&quot;master&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;path&quot;</span><span class="o">:</span> <span class="s2">&quot;typings&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;bundle&quot;</span><span class="o">:</span> <span class="s2">&quot;typings/tsd.d.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;installed&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;angular2/angular2.d.ts&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s2">&quot;commit&quot;</span><span class="o">:</span> <span class="s2">&quot;38fb591c6eba840e0b53d1110302b8e4fb04651c&quot;</span>
+</span><span class='line'>      <span class="p">},</span>
+</span><span class='line'>    <span class="p">...</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p><strong>NOTE</strong>: Typing for angular2 are not complete at the moment they plan to complete it before the beta lauch but we should be good to start playing around with the current basic type definitions.</p></blockquote>
+
+<h2>Let&rsquo;s install TypeScript compiler</h2>
+
+<p>For the Typescript to compile we need a tsconfig.json file in the root of the project.</p>
+
+<p>There are two basic components of a tsconfig.json file.</p>
+
+<ol>
+<li>compilerOptions</li>
+<li>files</li>
+</ol>
+
+
+<p>Sample tsconfig.json from <a href="https://github.com/Microsoft/TypeScript/wiki/tsconfig.json">TypeScript Wiki</a></p>
+
+<figure class='code'><figcaption><span>tsconfig.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;compilerOptions&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;module&quot;</span><span class="o">:</span> <span class="s2">&quot;commonjs&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;noImplicitAny&quot;</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>        <span class="p">...</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>      <span class="s2">&quot;files&quot;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>        <span class="s2">&quot;core.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;sys.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">...</span>
+</span><span class='line'>        <span class="p">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A lot of options can be passed to <a href="https://github.com/Microsoft/TypeScript/wiki/Compiler-Options">compilerOptions</a>. You can find that out from the wiki. It also uses default compiler options if none is given and also all the files will be included by default.</p>
+
+<p>So let’s go ahead and add our own tsconfig.json file.</p>
+
+<figure class='code'><figcaption><span>tsconfig.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;version&quot;</span><span class="o">:</span> <span class="s2">&quot;1.5.0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;compilerOptions&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s2">&quot;target&quot;</span><span class="o">:</span> <span class="s2">&quot;es5&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;module&quot;</span><span class="o">:</span> <span class="s2">&quot;commonjs&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;declaration&quot;</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;noImplicitAny&quot;</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;removeComments&quot;</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;noLib&quot;</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;emitDecoratorMetadata&quot;</span><span class="o">:</span> <span class="kc">true</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="s2">&quot;filesGlob&quot;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>        <span class="s2">&quot;./**/*.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;!./node_modules/**/*.ts&quot;</span>
+</span><span class='line'>    <span class="p">],</span>
+</span><span class='line'>    <span class="s2">&quot;files&quot;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>        <span class="s2">&quot;./app.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;./typings/angular2/angular2.d.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;./typings/es6-promise/es6-promise.d.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;./typings/rx/rx-lite.d.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;./typings/rx/rx.d.ts&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s2">&quot;./typings/tsd.d.ts&quot;</span>
+</span><span class='line'>    <span class="p">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now install the typescript that will be compiling or converting typescript code to
+Javascript code to make the browsers understand the code. As of now browsers don&rsquo;t
+have native support for typescript nor ES6 completely.</p>
+
+<p>Once installed we can use tsc for transpiling ts to js.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  <span class="nv">$ </span>npm install -g typescript
+</span><span class='line'>  <span class="nv">$ </span>tsc -w <span class="c">#realtime transpile ts to js.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Application</h3>
+
+<p>First we will be creating a file called app.js, that was included in tsconfig.json.</p>
+
+<figure class='code'><figcaption><span>app.ts</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>  <span class="c1">/// &lt;reference path=&quot;typings/angular2/angular2.d.ts&quot; /&gt;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">import</span> <span class="p">{</span><span class="nx">Component</span><span class="p">,</span> <span class="nx">View</span><span class="p">,</span> <span class="nx">bootstrap</span><span class="p">,</span> <span class="nx">NgFor</span><span class="p">,</span> <span class="nx">NgIf</span><span class="p">}</span> <span class="nx">from</span> <span class="s2">&quot;angular2/angular2&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="err">@</span><span class="nx">Component</span><span class="p">({</span>
+</span><span class='line'>    <span class="nx">selector</span><span class="o">:</span> <span class="s1">&#39;todo-app&#39;</span>
+</span><span class='line'>  <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="err">@</span><span class="nx">View</span><span class="p">({</span>
+</span><span class='line'>    <span class="nx">template</span><span class="o">:</span> <span class="err">`</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="nx">h2</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">ul</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">li</span> <span class="o">*</span><span class="nx">ng</span><span class="o">-</span><span class="k">for</span><span class="o">=</span><span class="s2">&quot;#todo of todos&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="p"></span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/li&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="err">/ul&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">input</span> <span class="err">#</span><span class="nx">todotext</span> <span class="p">(</span><span class="nx">keyup</span><span class="p">)</span><span class="o">=</span><span class="s2">&quot;doneTyping($event)&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">button</span> <span class="p">(</span><span class="nx">click</span><span class="p">)</span><span class="o">=</span><span class="s2">&quot;addTodo(todotext.value, $event)&quot;</span><span class="o">&gt;</span><span class="nx">Add</span> <span class="nx">Todo</span><span class="o">&lt;</span><span class="err">/button&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="err">/h2&gt;</span>
+</span><span class='line'>    <span class="err">`</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">directives</span><span class="o">:</span> <span class="p">[</span><span class="nx">NgFor</span><span class="p">,</span> <span class="nx">NgIf</span><span class="p">]</span>
+</span><span class='line'>  <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kr">class</span> <span class="nx">TodoApp</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">todos</span><span class="o">:</span> <span class="nb">Array</span><span class="o">&lt;</span><span class="nx">string</span><span class="o">&gt;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">constructor</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">todos</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Eat Breakfast&quot;</span><span class="p">,</span> <span class="s2">&quot;Walk Dog&quot;</span><span class="p">,</span> <span class="s2">&quot;Breathe&quot;</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">addTodo</span><span class="p">(</span><span class="nx">todo</span><span class="o">:</span> <span class="nx">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">todos</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">todo</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">doneTyping</span><span class="p">(</span><span class="nx">$event</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">$event</span><span class="p">.</span><span class="nx">which</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="nx">$event</span><span class="p">.</span><span class="nx">which</span> <span class="o">===</span> <span class="mi">13</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">this</span><span class="p">.</span><span class="nx">addTodo</span><span class="p">(</span><span class="nx">$event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">$event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">bootstrap</span><span class="p">(</span><span class="nx">TodoApp</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>For details on the code please visit these <a href="https://angular.io/docs/js/latest/guide/">step by step guides</a>.</p></blockquote>
+
+<p>Also install angular2, traceur, systemjs by adding it inside package.json.
+Or by <code>npm install angular2 traceur systemjs</code>, whichever suits you.</p>
+
+<ol>
+<li>Angular2 so that our transpiled Js can be used on the frontend</li>
+<li>Traceur is es6 to es5 transpiler browsers don’t support es6 as of yet but not for long.</li>
+<li>SystemJs is univerval dynamic module loader.</li>
+</ol>
+
+
+<figure class='code'><figcaption><span>package.json</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'>  <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;todoapp&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;version&quot;</span><span class="o">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;description&quot;</span><span class="o">:</span> <span class="s2">&quot;Todo App in Angularjs 2&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;main&quot;</span><span class="o">:</span> <span class="s2">&quot;app.js&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;scripts&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;test&quot;</span><span class="o">:</span> <span class="s2">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="s2">&quot;repository&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;type&quot;</span><span class="o">:</span> <span class="s2">&quot;git&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;url&quot;</span><span class="o">:</span> <span class="s2">&quot;git+https://github.com/pkrawat1/todoapp.git&quot;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="s2">&quot;author&quot;</span><span class="o">:</span> <span class="s2">&quot;Pankaj Kumar Rawat&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;license&quot;</span><span class="o">:</span> <span class="s2">&quot;ISC&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;bugs&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;url&quot;</span><span class="o">:</span> <span class="s2">&quot;https://github.com/pkrawat1/todoapp/issues&quot;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="s2">&quot;homepage&quot;</span><span class="o">:</span> <span class="s2">&quot;https://github.com/pkrawat1/todoapp#readme&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s2">&quot;keywords&quot;</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>      <span class="s2">&quot;angular2&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;typescript&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;tds&quot;</span>
+</span><span class='line'>    <span class="p">],</span>
+</span><span class='line'>    <span class="s2">&quot;dependencies&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;angular2&quot;</span><span class="o">:</span> <span class="s2">&quot;latest&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;systemjs&quot;</span><span class="o">:</span> <span class="s2">&quot;latest&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;traceur&quot;</span><span class="o">:</span> <span class="s2">&quot;latest&quot;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>In order to use these components we need to create an index.html file.
+The code is self explanatory here if not head over to <a href="https://angular.io/docs/js/latest/guide/">angular.io</a> they have very good explanations up on their websites.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  <span class="cp">&lt;!doctype html&gt;</span>
+</span><span class='line'>  <span class="cp">&lt;!doctype html&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;html&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;head&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;title&gt;</span>Angular 2 Todo App<span class="nt">&lt;/title&gt;</span>
+</span><span class='line'>      <span class="c">&lt;!--</span>
+</span><span class='line'><span class="c">      &lt;script src=&quot;https://github.jspm.io/jmcriffey/bower-traceur-runtime@0.0.87/traceur-runtime.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="c">      &lt;script src=&quot;https://jspm.io/system@0.16.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="c">      &lt;script src=&quot;https://code.angularjs.org/2.0.0-alpha.28/angular2.dev.js&quot;&gt;&lt;/script&gt;</span>
+</span><span class='line'><span class="c">      --&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;node_modules/traceur/bin/traceur-runtime.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;node_modules/systemjs/dist/system.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">&quot;node_modules/angular2/bundles/angular2.min.js&quot;</span><span class="nt">&gt;&lt;/script&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/head&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;script&gt;</span>
+</span><span class='line'>        <span class="nx">System</span><span class="p">.</span><span class="kr">import</span><span class="p">(</span><span class="s1">&#39;app.js&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nt">&lt;/script&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;todo-app&gt;&lt;/todo-app&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/html&gt;</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>For starting a local server</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>  npm install http-server
+</span><span class='line'>  http-server -c-1 <span class="c"># to disable cache</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Hurrrrayyy!!!</h1>
+
+<p>If everything goes right you should see the list of tasks with an input box in the browser when you go to <a href="http://localhost:8080">http://localhost:8080</a>.</p>
+
+<p>The repository of this whole code is hosted on <a href="https://github.com/pkrawat1/todoapp.git">github</a> in v2 branch.</p>
+
+<p>Reach out to me on my email, twitter or comment below if you are stuck anywhere and I’d be more than happy to help you.</p>
+
+
+
+</article>
+
+
+<section id="disqus">
+    <h1 class="disqus__title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+
+                </div>
+
+                
+                <aside class="sidebar col-xs-12 col-md-4 col-lg-4">
+                    <div class="row">
+
+    
+        <section class="hire--aside col-xs-12 col-sm-10 col-md-12">
+            
+    
+
+
+
+    
+
+
+
+
+<div class="hire hire--available">
+    <a class="hire__link" href="mailto:pankajrawat19sept@gmail.com?subject=New%20job%20opportunity">
+        Available for new opportunities
+    </a>
+</div>
+
+
+        </section>
+    
+
+    
+<section class="social col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        Follow me!
+    </h1>
+    <ul class="unstyled">
+        
+        
+        
+        <li><a class="facebook" href="//facebook.com/pkrawat1"><i class="fa fa-facebook-square"></i> Facebook</a></li>
+        <li><a class="github" href="//github.com/pkrawat1"><i class="fa fa-github"></i> Github</a></li>
+        <li><a class="googleplus" href="//plus.google.com/+PankajRawat"><i class="fa fa-google-plus-square"></i> Google+</a></li>
+        
+        
+        <li><a class="linkedin" href="//linkedin.com/in/pkrawat1"><i class="fa fa-linkedin-square"></i> LinkedIn</a></li>
+        
+        
+        <li><a class="stackoverflow" href="//stackoverflow.com/users/2481868"><i class="fa fa-stack-overflow"></i> StackOverflow</a></li>
+        <li><a class="twitter" href="//twitter.com/pkrawat1"><i class="fa fa-twitter"></i> Twitter</a></li>
+        
+    </ul>
+</section>
+
+
+
+    <section id="recent-posts" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>Recent Posts</h1>
+    <ul class="divided">
+        
+        <li class="post">
+            <a href="/blog/2016/06/18/rails-caching-and-active-record-extensions/">Rails Caching and Active Record Extensions</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2015/08/25/todoapp-in-angular2-with-typescript/">TodoApp in Angular2 with TypeScript</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2014/12/06/javascript-back-to-basics-part-1/">Javascript Back to Basics part 1</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2014/11/15/tussle-of-the-state-machines/">Tussle of the State Machines</a>
+        </li>
+        
+    </ul>
+</section>
+
+<section id="twitter-timeline" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        Latest Tweets
+        
+        <small class="pull-right">
+            <a class="btn" href="//twitter.com/pkrawat1" title="@pkrawat1 on Twitter" target="_blank">
+                <i class="fa fa-external-link"></i>
+            </a>
+        </small>
+        
+    </h1>
+
+    <a class="twitter-timeline" data-dnt="true" href="//twitter.com/pkrawat1"  data-widget-id="636473342652878848"  data-link-color="#049cdb" data-tweet-limit="" data-chrome="noheader nofooter transparent noscrollbar">Tweets by @pkrawat1</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</section>
+
+
+<section id="github-repos" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        GitHub Repos
+        
+        <small class="pull-right">
+            <a class="btn" href="//github.com/pkrawat1" title="@pkrawat1 on GitHub" target="_blank">
+                <i class="fa fa-external-link"></i>
+            </a>
+        </small>
+        
+    </h1>
+    <ul id="gh_repos" class="divided">
+        <li class="loading">
+            <i class="fa fa-spinner fa-spin"></i>
+        </li>
+    </ul>
+</section>
+
+
+
+
+
+
+</div>
+
+                </aside>
+                
+            </div>
+        </div>
+
+        
+
+    
+    
+
+
+
+
+<footer class="footer">
+    <div class="row middle-xs">
+        
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <p class="footer__copyright">
+    All content copyright Pankaj Kumar Rawat.<br>
+    Code under <a href="//github.com/coogie/oscailte/blob/master/README.md">MIT Licence</a>.
+</p>
+
+        </div>
+        
+        
+    </div>
+</footer>
+
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="//crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+<script defer src="/javascripts/octopress.js"></script>
+
+
+<script>
+    var _gaq=[['_setAccount','UA-66794290-1'],['_trackPageview']];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+    s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+
+
+<script>
+    var disqus_shortname = 'pkrawat1';
+    
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pkrawat1.github.io/blogs/blog/2015/08/25/todoapp-in-angular2-with-typescript/';
+        var disqus_url = 'http://pkrawat1.github.io/blogs/blog/2015/08/25/todoapp-in-angular2-with-typescript/';
+        var disqus_script = 'embed.js';
+    
+    (function () {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+<script>
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'pkrawat1',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+</script>
+<script src="/javascripts/github.js"></script>
+
+
+
+
+
+
+
+    </body>
+
+</html>

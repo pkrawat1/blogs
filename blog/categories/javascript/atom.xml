@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+    <title><![CDATA[Category: javascript | Just Curiosity]]></title>
+    <link href="http://pkrawat1.github.io/blogs/blog/categories/javascript/atom.xml" rel="self"/>
+    <link href="http://pkrawat1.github.io/blogs/"/>
+    <updated>2016-11-22T11:29:29+05:30</updated>
+    <id>http://pkrawat1.github.io/blogs/</id>
+    <author>
+        <name><![CDATA[Pankaj Kumar Rawat]]></name>
+        <email><![CDATA[pankajrawat19sept@gmail.com]]></email>
+      </author>
+    <generator uri="http://octopress.org/">Octopress</generator>
+
+    
+    <entry>
+        <title type="html"><![CDATA[Javascript Back to Basics part 1]]></title>
+        <link href="http://pkrawat1.github.io/blogs/blog/2014/12/06/javascript-back-to-basics-part-1/"/>
+        <updated>2014-12-06T17:47:23+05:30</updated>
+        <id>http://pkrawat1.github.io/blogs/blog/2014/12/06/javascript-back-to-basics-part-1</id>
+        <content type="html"><![CDATA[<h1>Overview</h1>
+
+<p>JavaScript is an object oriented dynamic language, it has types and operators, core objects, and methods.</p>
+
+<p>One of the key differences is that JavaScript does not have classes, instead, the class functionality is accomplished by object prototypes.</p>
+
+<p>The other main difference is that functions are objects, giving functions the capacity to hold executable code and be passed around like any other object.</p>
+
+<h1>What is an Object?</h1>
+
+<p>An object is a dynamic collection of properties. Every Property has a unique key string within the object.</p>
+
+<pre><code class="javascript">//Fundamental operations
+get
+    object.name
+    object['name']
+set
+    object.name = value;
+    object['name'] = value;
+delete
+    delete object.name
+    delete object['name']
+</code></pre>
+
+<h1>Property</h1>
+
+<p>A property is named collection of attributes.</p>
+
+<p><strong>Types</strong></p>
+
+<ol>
+<li><strong>Data Properties</strong></li>
+<li><strong>Accessor Properties</strong></li>
+</ol>
+
+
+<h3>Different Properties</h3>
+
+<ul>
+<li>value: anything</li>
+<li>writable: boolean ;  For true, the property value can be modified.</li>
+<li>enumerable: boolean ; For true, property can be enumerated by a for…in statement.</li>
+<li>congigurable: bollean ; For true, property attributes can be changed, and the property can be deleted.</li>
+<li>get: function(){&hellip;return value}</li>
+<li>set: funtion(value){&hellip;}</li>
+</ul>
+
+
+<h3>Data Properties</h3>
+
+<p>A data property is a property that can get and set a value. Data properties contain the value and writable properties in their descriptors.</p>
+
+<p>Data Descriptor attributes are:
+<strong>value, writable, enumerable, configurable</strong></p>
+
+<h3>Data Properties Added Without Using defineProperty</h3>
+
+<p>If you add a data property without using the <strong>Object.defineProperty</strong>, <strong>Object.defineProperties</strong>, or<strong> Object.create functions</strong>, the writable, enumerable, and configurable attributes are all set to true. After the property is added, you can modify it by using the <strong>Object.defineProperty</strong> function.</p>
+
+<p>You can use the following ways to add a data property:</p>
+
+<ul>
+<li>An assignment operator (=), as in obj.color = &ldquo;white&rdquo;;</li>
+<li>An object literal, as in obj = { color: &ldquo;white&rdquo;, height: 5 };</li>
+<li>A construction function
+<code>javascript
+function Circle (xPoint, yPoint, radius) {
+  this.x = xPoint;
+  this.y = yPoint;
+  this.r = radius;
+}
+//Invoking constructor
+var aCircle = new Circle(5, 11, 99);
+//The type of all objects created with a custom constructor is object.
+//There are only six types in JavaScript:
+//object, function, string, number, boolean, and undefined
+</code></li>
+</ul>
+
+
+<h1>Creating Object</h1>
+
+<pre><code class="javascript">// writable, enumerable, congigurable is set true
+var test = {foo: bar};
+//Also written as
+var test = Object.defineProperties(
+    Object.create(Object.prototype), {
+        foo: {
+            value: bar,
+            writable: true,
+            enumerable: true,
+            congigurable: true
+        }
+    }
+);
+//Here
+Object.create(Object.prototype) gives an Object {}
+</code></pre>
+
+<h3>Accessor Properties</h3>
+
+<p>An accessor property calls a user-provided function every time that the property value is set or retrieved. The descriptor for an accessor property contains a get attribute, a set attribute, or both.
+<strong>Accessor descriptor attributes</strong>
+* <strong>get</strong>, A function that returns the property value. The function has no parameters.
+* <strong>set</strong>, A function that sets the property value. It has one parameter that contains the value to be assigned.
+* <strong>enumerable</strong>
+* <strong>configurable</strong></p>
+
+<pre><code class="javascript">Object.defineProperty(height_to_weight,
+    'height', {
+        get: function(){
+            return this.weight * 2.7;
+        },
+        set: function(value){
+            this.weight = value / 2.7;
+        },
+        enumerable: true
+    }
+);
+
+height_to_weight.height= 175 // {height: 175, weight: 65}
+</code></pre>
+]]></content>
+    </entry>
+    
+</feed>

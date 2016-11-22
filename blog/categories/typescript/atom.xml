@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+    <title><![CDATA[Category: typescript | Just Curiosity]]></title>
+    <link href="http://pkrawat1.github.io/blogs/blog/categories/typescript/atom.xml" rel="self"/>
+    <link href="http://pkrawat1.github.io/blogs/"/>
+    <updated>2016-11-22T11:29:29+05:30</updated>
+    <id>http://pkrawat1.github.io/blogs/</id>
+    <author>
+        <name><![CDATA[Pankaj Kumar Rawat]]></name>
+        <email><![CDATA[pankajrawat19sept@gmail.com]]></email>
+      </author>
+    <generator uri="http://octopress.org/">Octopress</generator>
+
+    
+    <entry>
+        <title type="html"><![CDATA[TodoApp in Angular2 with TypeScript]]></title>
+        <link href="http://pkrawat1.github.io/blogs/blog/2015/08/25/todoapp-in-angular2-with-typescript/"/>
+        <updated>2015-08-25T15:35:36+05:30</updated>
+        <id>http://pkrawat1.github.io/blogs/blog/2015/08/25/todoapp-in-angular2-with-typescript</id>
+        <content type="html"><![CDATA[<blockquote><p><strong>Warning</strong>: Angular is continuosly changing at this point.
+<strong>Visit</strong>: <a href="https://goo.gl/BPGMVO">Ecommerce App</a> for latest code in Angular2 Beta.</p></blockquote>
+
+<p>In this post I&rsquo;ll be sharing my experience during the application setup.
+I&rsquo;ll be creating an application from scratch, right from creating application folder.</p>
+
+<h1>Let&rsquo;s get started</h1>
+
+<h3>First thing first, create an application folder</h3>
+
+<pre><code class="bash">  $ mkdir todoapp
+  $ cd todoapp
+</code></pre>
+
+<p>Now we need to download typescript definition manager(tsd), just like npm(node package manager).
+You can install tsd with this simple command.</p>
+
+<pre><code class="bash">  $ npm install -g tsd  #use sudo if required
+  $ tsd --version # Validate installation by typing tsd in the console.
+</code></pre>
+
+<p>You can checkout some commands and how to use them in this <a href="https://www.npmjs.com/package/tsd">npm repo</a>.</p>
+
+<h3>Initializing the application</h3>
+
+<pre><code class="bash">  $ tsd init
+</code></pre>
+
+<p>This generated the tsd.json file. Just like in case of npm package.json is created.
+Anyone who has the access to this repository can do a $ tsd reinstall , like npm install we all are so used to.</p>
+
+<h3>Let&rsquo;s install typescript libraries</h3>
+
+<pre><code class="bash">  $ tsd query angular2
+    - angular2 / angular2
+</code></pre>
+
+<p>Let&rsquo;s fetch angular2 from the definitely typed repo.
+<code>bash
+  $ tsd query angular2 --action install --save
+</code>
+Doing this will create a directory called angular2 in the typings directory with a file called
+angular2.d.ts
+This will also update the tsd.json with current angular2 head sha.</p>
+
+<pre><code class="javascript tsd.json">  {
+    "version": "v4",
+    "repo": "borisyankov/DefinitelyTyped",
+    "ref": "master",
+    "path": "typings",
+    "bundle": "typings/tsd.d.ts",
+    "installed": {
+      "angular2/angular2.d.ts": {
+        "commit": "38fb591c6eba840e0b53d1110302b8e4fb04651c"
+      },
+    ...
+  }
+</code></pre>
+
+<blockquote><p><strong>NOTE</strong>: Typing for angular2 are not complete at the moment they plan to complete it before the beta lauch but we should be good to start playing around with the current basic type definitions.</p></blockquote>
+
+<h2>Let&rsquo;s install TypeScript compiler</h2>
+
+<p>For the Typescript to compile we need a tsconfig.json file in the root of the project.</p>
+
+<p>There are two basic components of a tsconfig.json file.</p>
+
+<ol>
+<li>compilerOptions</li>
+<li>files</li>
+</ol>
+
+
+<p>Sample tsconfig.json from <a href="https://github.com/Microsoft/TypeScript/wiki/tsconfig.json">TypeScript Wiki</a></p>
+
+<pre><code class="javascript tsconfig.json">  {
+    "compilerOptions": {
+      "module": "commonjs",
+        "noImplicitAny": true,
+        ...
+    },
+      "files": [
+        "core.ts",
+      "sys.ts",
+      ...
+        ]
+  }
+</code></pre>
+
+<p>A lot of options can be passed to <a href="https://github.com/Microsoft/TypeScript/wiki/Compiler-Options">compilerOptions</a>. You can find that out from the wiki. It also uses default compiler options if none is given and also all the files will be included by default.</p>
+
+<p>So let’s go ahead and add our own tsconfig.json file.</p>
+
+<pre><code class="javascript tsconfig.json">  {
+    "version": "1.5.0",
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "noLib": false,
+        "emitDecoratorMetadata": true
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "!./node_modules/**/*.ts"
+    ],
+    "files": [
+        "./app.ts",
+        "./typings/angular2/angular2.d.ts",
+        "./typings/es6-promise/es6-promise.d.ts",
+        "./typings/rx/rx-lite.d.ts",
+        "./typings/rx/rx.d.ts",
+        "./typings/tsd.d.ts"
+    ]
+  } 
+</code></pre>
+
+<p>Now install the typescript that will be compiling or converting typescript code to
+Javascript code to make the browsers understand the code. As of now browsers don&rsquo;t
+have native support for typescript nor ES6 completely.</p>
+
+<p>Once installed we can use tsc for transpiling ts to js.</p>
+
+<pre><code class="bash">  $ npm install -g typescript
+  $ tsc -w #realtime transpile ts to js.
+</code></pre>
+
+<h3>Application</h3>
+
+<p>First we will be creating a file called app.js, that was included in tsconfig.json.</p>
+
+<pre><code class="javascript app.ts">  /// &lt;reference path="typings/angular2/angular2.d.ts" /&gt;
+
+  import {Component, View, bootstrap, NgFor, NgIf} from "angular2/angular2";
+
+  @Component({
+    selector: 'todo-app'
+  })
+
+  @View({
+    template: `
+      &lt;h2&gt;
+        &lt;ul&gt;
+          &lt;li *ng-for="#todo of todos"&gt;
+            
+          &lt;/li&gt;
+        &lt;/ul&gt;
+
+        &lt;input #todotext (keyup)="doneTyping($event)"&gt;
+        &lt;button (click)="addTodo(todotext.value, $event)"&gt;Add Todo&lt;/button&gt;
+      &lt;/h2&gt;
+    `,
+    directives: [NgFor, NgIf]
+  })
+
+  class TodoApp {
+    todos: Array&lt;string&gt;;
+
+    constructor() {
+      this.todos = ["Eat Breakfast", "Walk Dog", "Breathe"];
+    }
+
+    addTodo(todo: string) {
+      this.todos.push(todo);
+    }
+
+    doneTyping($event) {
+      console.log($event.which);
+
+      if($event.which === 13) {
+        this.addTodo($event.target.value);
+        $event.target.value = null;
+      }
+    }
+  }
+
+  bootstrap(TodoApp);
+</code></pre>
+
+<blockquote><p>For details on the code please visit these <a href="https://angular.io/docs/js/latest/guide/">step by step guides</a>.</p></blockquote>
+
+<p>Also install angular2, traceur, systemjs by adding it inside package.json.
+Or by <code>npm install angular2 traceur systemjs</code>, whichever suits you.</p>
+
+<ol>
+<li>Angular2 so that our transpiled Js can be used on the frontend</li>
+<li>Traceur is es6 to es5 transpiler browsers don’t support es6 as of yet but not for long.</li>
+<li>SystemJs is univerval dynamic module loader.</li>
+</ol>
+
+
+<pre><code class="javascript package.json">  {
+    "name": "todoapp",
+    "version": "1.0.0",
+    "description": "Todo App in Angularjs 2",
+    "main": "app.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" &amp;&amp; exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/pkrawat1/todoapp.git"
+    },
+    "author": "Pankaj Kumar Rawat",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/pkrawat1/todoapp/issues"
+    },
+    "homepage": "https://github.com/pkrawat1/todoapp#readme",
+    "keywords": [
+      "angular2",
+      "typescript",
+      "tds"
+    ],
+    "dependencies": {
+      "angular2": "latest",
+      "systemjs": "latest",
+      "traceur": "latest"
+    }
+  }
+</code></pre>
+
+<p>In order to use these components we need to create an index.html file.
+The code is self explanatory here if not head over to <a href="https://angular.io/docs/js/latest/guide/">angular.io</a> they have very good explanations up on their websites.</p>
+
+<pre><code class="html">  &lt;!doctype html&gt;
+  &lt;!doctype html&gt;
+  &lt;html&gt;
+    &lt;head&gt;
+      &lt;title&gt;Angular 2 Todo App&lt;/title&gt;
+      &lt;!--
+      &lt;script src="https://github.jspm.io/jmcriffey/bower-traceur-runtime@0.0.87/traceur-runtime.js"&gt;&lt;/script&gt;
+      &lt;script src="https://jspm.io/system@0.16.js"&gt;&lt;/script&gt;
+      &lt;script src="https://code.angularjs.org/2.0.0-alpha.28/angular2.dev.js"&gt;&lt;/script&gt;
+      --&gt;
+      &lt;script src="node_modules/traceur/bin/traceur-runtime.js"&gt;&lt;/script&gt;
+      &lt;script src="node_modules/systemjs/dist/system.js"&gt;&lt;/script&gt;
+      &lt;script src="node_modules/angular2/bundles/angular2.min.js"&gt;&lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+      &lt;script&gt;
+        System.import('app.js');
+      &lt;/script&gt;
+      &lt;todo-app&gt;&lt;/todo-app&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+</code></pre>
+
+<h3>For starting a local server</h3>
+
+<pre><code class="bash">  npm install http-server
+  http-server -c-1 # to disable cache
+</code></pre>
+
+<h1>Hurrrrayyy!!!</h1>
+
+<p>If everything goes right you should see the list of tasks with an input box in the browser when you go to <a href="http://localhost:8080">http://localhost:8080</a>.</p>
+
+<p>The repository of this whole code is hosted on <a href="https://github.com/pkrawat1/todoapp.git">github</a> in v2 branch.</p>
+
+<p>Reach out to me on my email, twitter or comment below if you are stuck anywhere and I’d be more than happy to help you.</p>
+]]></content>
+    </entry>
+    
+</feed>

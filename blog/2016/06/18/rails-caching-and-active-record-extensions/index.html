@@ -1,0 +1,560 @@
+<!doctype html>
+    <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+    <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+    <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+    <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+
+    
+      
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Rails Caching and Active Record Extensions - Just Curiosity</title>
+        <meta name="author" content="Pankaj Kumar Rawat">
+        
+        <meta name="description" content="Rails Caching and Active Record Extensions Jun 18th, 2016 As a rails developer, I have gone through situations when we really want to get the most &hellip;">
+        
+        <meta name="viewport" content="width=device-width">
+        <link rel="canonical" href="http://pkrawat1.github.io/blogs/blog/2016/06/18/rails-caching-and-active-record-extensions">
+
+        <link href='http://fonts.googleapis.com/css?family=Droid+Serif:400,400italic' rel='stylesheet' type='text/css'>
+        <link href="http://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet" type="text/css">
+
+        
+        <link href="/favicon.png" rel="icon">
+        <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet">
+        <link href="/atom.xml" rel="alternate" title="Just Curiosity" type="application/atom+xml">
+    </head>
+
+
+    <body >
+
+        <header id="header">
+    <div class="row">
+    <div class="col-xs-12 col-sm-8 col-md-4">
+        <a href="/" class="site-title">Just Curiosity</a>
+    </div>
+    <div class="col-xs-12 col-sm-4 col-md-8">
+        <nav>
+    <input type="checkbox" id="toggle">
+    <label for="toggle" class="toggle" data-open="Main Menu" data-close="Close Menu"></label>
+    <ul class="menu">
+    <li><a href="/">Home</a></li>
+    <li><a href="/blog/">Blog</a></li>
+</ul>
+
+</nav>
+
+    </div>
+</div>
+
+</header>
+
+
+        <div id="main-content">
+
+            <!--[if lte IE 9]>
+<div class="row upgrade-row">
+    <div class="col-lg-12">
+        <div class="upgrade">
+            <i class="upgrade__icon fa fa-warning"></i>
+            <h1 class="upgrade__title h6">Ohnoes!</h1>
+            <p class="upgrade__text">
+                Unfortunately, certain parts of this site may not display correctly in your version of Internet Explorer!<br>
+                If possible, you should consider <a href="http://browsehappy.com/">upgrading your browser</a>.
+            </p>
+        </div>
+    </div>
+</div>
+<!-- <![endif]-->
+
+
+            
+
+            <div class="row top-xs center-sm center-md center-lg site-wrapper">
+                
+                <div class="col-xs-12 col-sm-10 col-md-8 col-lg-8">
+                
+                    <article class="article article--single">
+    <header class="article__header">
+    
+        <h1 class="article__title">Rails Caching and Active Record Extensions</h1>
+    
+
+    
+        <div class="article__meta clearfix">
+            
+
+
+
+
+
+
+    <time class="article__date pull-left" datetime="2016-06-18T21:34:14+05:30" pubdate><i class="fa fa-calendar"></i> Jun 18th, 2016</time>
+
+
+
+
+            
+
+
+            
+        </div>
+    
+</header>
+
+
+
+
+    <p>As a rails developer, I have gone through situations when we really want to get the most out of the limited resources.
+So we opt for digging out the areas where we can improve. And caching is one of the option everybody thinks about, and implement.</p>
+
+<h4>Situation</h4>
+
+<p>Lately I have been looking at the solution to cache the Active Record Objects directly. Also if it could cache the methods frequently used methods too.
+So I learn&rsquo;t that <code>Rails.cache</code> could actually store the Active records directly, that can be configured with redis easily.</p>
+
+<h6>The Problem</h6>
+
+<p>The code was too repetitive. Every Where I see was a similar pattern
+like</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Write</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># Read</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># Clear</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">del</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This was becoming a real issue. So I thought if we can have class method where we could just pass in the method names, and create the cache, that could be shared with all models. So first solution I thought of was creating a Concern that would be included in all models. So came up with this soution.</p>
+
+<h4>The Solution</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">CachedMethods</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Concern</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">module</span> <span class="nn">ClassMethods</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">cached_methods</span><span class="p">(</span><span class="o">*</span><span class="nb">methods</span><span class="p">)</span>
+</span><span class='line'>      <span class="nb">methods</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">association</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">define_method</span><span class="p">(</span><span class="s2">&quot;cached_</span><span class="si">#{</span><span class="n">association</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">key</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span> <span class="n">cached</span> <span class="o">=</span> <span class="kp">nil</span><span class="o">|</span>
+</span><span class='line'>          <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">association</span><span class="si">}</span><span class="s2">_for_</span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">_</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>          <span class="n">cached</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">rescue</span> <span class="kp">false</span>
+</span><span class='line'>          <span class="k">return</span> <span class="n">cached</span> <span class="k">if</span> <span class="n">cached</span>
+</span><span class='line'>          <span class="n">load_assoc</span> <span class="o">=</span> <span class="nb">send</span><span class="p">(</span><span class="n">association</span><span class="p">)</span>
+</span><span class='line'>          <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">load_assoc</span><span class="p">,</span> <span class="ss">expires_in</span><span class="p">:</span> <span class="mi">30</span><span class="o">.</span><span class="n">minutes</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">update_cache_keys</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span class='line'>          <span class="n">load_assoc</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">define_method</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">association</span><span class="si">}</span><span class="s2">_is_cached?&quot;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">association</span><span class="si">}</span><span class="s2">_for_</span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">_</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>          <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">present?</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># keeps tracks of all cache keys, for the included class.</span>
+</span><span class='line'>  <span class="n">define_method</span><span class="p">(</span><span class="s1">&#39;update_cache_keys&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">key</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">multi_key</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">_</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">_cache_keys&quot;</span>
+</span><span class='line'>    <span class="n">keys</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">multi_key</span><span class="p">)</span> <span class="o">||</span> <span class="o">[]</span>
+</span><span class='line'>    <span class="n">keys</span> <span class="o">&lt;&lt;</span> <span class="n">key</span>
+</span><span class='line'>    <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">multi_key</span><span class="p">,</span> <span class="n">keys</span><span class="o">.</span><span class="n">uniq</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># can be called to clear all cached data for included class</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">delete_cache</span>
+</span><span class='line'>    <span class="n">cached</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">underscore</span><span class="si">}</span><span class="s2">_</span><span class="si">#{</span><span class="nb">id</span><span class="si">}</span><span class="s2">_cache_keys&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">unless</span> <span class="n">cached</span>
+</span><span class='line'>    <span class="n">cached</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">key</span><span class="o">|</span> <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>But I did not want this to manually including every where in the application. I don&rsquo;t want to remember which concern to use. So thought of creating an extension for the Active record.</p>
+
+<h4>Improvement</h4>
+
+<p>So created an ActiveRecordExtension.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Inculde custom enxtensions here</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">ActiveRecordExtension</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Concern</span>
+</span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
+</span><span class='line'>    <span class="kp">include</span> <span class="no">CachedMethods</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># include the extension</span>
+</span><span class='line'><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:include</span><span class="p">,</span> <span class="no">ActiveRecordExtension</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>Create an initializer called extensions, that will load it during application initialization.</p>
+
+<p><code>require "active_record_extension"</code></p></blockquote>
+
+<h4>How to Use</h4>
+
+<p>Now anybody can use this extension in the system easily.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># ========================================</span>
+</span><span class='line'><span class="c1">#                  USAGE</span>
+</span><span class='line'><span class="c1"># ========================================</span>
+</span><span class='line'><span class="c1"># // Ruby.</span>
+</span><span class='line'><span class="no">Class</span> <span class="no">Fruit</span>
+</span><span class='line'><span class="c1">#   ...</span>
+</span><span class='line'><span class="c1">#   # this code generates some instance methods</span>
+</span><span class='line'><span class="c1">#   # cached_apples and cached_mangoes</span>
+</span><span class='line'><span class="c1">#   # which when called the first time, will cache the ActiveRecord Object,</span>
+</span><span class='line'><span class="c1">#   # and after every call will get the object back from the cache only.</span>
+</span><span class='line'><span class="c1">#   # You can also cache the method results too.</span>
+</span><span class='line'><span class="c1">#   # Also it creates cache check instance methods</span>
+</span><span class='line'><span class="c1">#   # as in this case apples_is_cached? And mangos_is_cached?</span>
+</span><span class='line'><span class="n">cached_methods</span> <span class="ss">:apples</span><span class="p">,</span> <span class="ss">:mangos</span>
+</span><span class='line'><span class="c1">#   # As the name suggests, this method will clear all the cache related</span>
+</span><span class='line'><span class="c1">#   # to the class.</span>
+</span><span class='line'><span class="n">after_save</span> <span class="ss">:delete_cache</span>
+</span><span class='line'><span class="c1">#   ...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>Now that looks easier to use.</p></blockquote>
+
+<h4>What is provides</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">fruit</span> <span class="o">=</span> <span class="no">Fruit</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="n">apples</span> <span class="o">=</span> <span class="n">fruit</span><span class="o">.</span><span class="n">cached_apples</span> <span class="c1"># cache apples</span>
+</span><span class='line'><span class="n">mangos</span> <span class="o">=</span> <span class="n">fruit</span><span class="o">.</span><span class="n">cached_mangoes</span> <span class="c1"># cache mangoes</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Now if you this code is run again</span>
+</span><span class='line'><span class="n">apples</span> <span class="o">=</span> <span class="n">fruit</span><span class="o">.</span><span class="n">cached_apples</span> <span class="c1"># from cache</span>
+</span><span class='line'><span class="n">mangoes</span> <span class="o">=</span> <span class="n">fruit</span><span class="o">.</span><span class="n">cached_mangoes</span> <span class="c1"># from cache</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># the cache will auto expire after 30 minutes</span>
+</span><span class='line'><span class="c1"># or if the Fruit object is updated.</span>
+</span><span class='line'><span class="c1"># we have added delete_cache callback</span>
+</span><span class='line'><span class="n">after_save</span> <span class="ss">:delete_cache</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>How cool is that.</p></blockquote>
+
+<h5>Try it yourself Now.</h5>
+
+
+
+</article>
+
+
+<section id="disqus">
+    <h1 class="disqus__title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+
+                </div>
+
+                
+                <aside class="sidebar col-xs-12 col-md-4 col-lg-4">
+                    <div class="row">
+
+    
+        <section class="hire--aside col-xs-12 col-sm-10 col-md-12">
+            
+    
+
+
+
+    
+
+
+
+
+<div class="hire hire--available">
+    <a class="hire__link" href="mailto:pankajrawat19sept@gmail.com?subject=New%20job%20opportunity">
+        Available for new opportunities
+    </a>
+</div>
+
+
+        </section>
+    
+
+    
+<section class="social col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        Follow me!
+    </h1>
+    <ul class="unstyled">
+        
+        
+        
+        <li><a class="facebook" href="//facebook.com/pkrawat1"><i class="fa fa-facebook-square"></i> Facebook</a></li>
+        <li><a class="github" href="//github.com/pkrawat1"><i class="fa fa-github"></i> Github</a></li>
+        <li><a class="googleplus" href="//plus.google.com/+PankajRawat"><i class="fa fa-google-plus-square"></i> Google+</a></li>
+        
+        
+        <li><a class="linkedin" href="//linkedin.com/in/pkrawat1"><i class="fa fa-linkedin-square"></i> LinkedIn</a></li>
+        
+        
+        <li><a class="stackoverflow" href="//stackoverflow.com/users/2481868"><i class="fa fa-stack-overflow"></i> StackOverflow</a></li>
+        <li><a class="twitter" href="//twitter.com/pkrawat1"><i class="fa fa-twitter"></i> Twitter</a></li>
+        
+    </ul>
+</section>
+
+
+
+    <section id="recent-posts" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>Recent Posts</h1>
+    <ul class="divided">
+        
+        <li class="post">
+            <a href="/blog/2016/06/18/rails-caching-and-active-record-extensions/">Rails Caching and Active Record Extensions</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2015/08/25/todoapp-in-angular2-with-typescript/">TodoApp in Angular2 with TypeScript</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2014/12/06/javascript-back-to-basics-part-1/">Javascript Back to Basics part 1</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2014/11/15/tussle-of-the-state-machines/">Tussle of the State Machines</a>
+        </li>
+        
+    </ul>
+</section>
+
+<section id="twitter-timeline" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        Latest Tweets
+        
+        <small class="pull-right">
+            <a class="btn" href="//twitter.com/pkrawat1" title="@pkrawat1 on Twitter" target="_blank">
+                <i class="fa fa-external-link"></i>
+            </a>
+        </small>
+        
+    </h1>
+
+    <a class="twitter-timeline" data-dnt="true" href="//twitter.com/pkrawat1"  data-widget-id="636473342652878848"  data-link-color="#049cdb" data-tweet-limit="" data-chrome="noheader nofooter transparent noscrollbar">Tweets by @pkrawat1</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</section>
+
+
+<section id="github-repos" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        GitHub Repos
+        
+        <small class="pull-right">
+            <a class="btn" href="//github.com/pkrawat1" title="@pkrawat1 on GitHub" target="_blank">
+                <i class="fa fa-external-link"></i>
+            </a>
+        </small>
+        
+    </h1>
+    <ul id="gh_repos" class="divided">
+        <li class="loading">
+            <i class="fa fa-spinner fa-spin"></i>
+        </li>
+    </ul>
+</section>
+
+
+
+
+
+
+</div>
+
+                </aside>
+                
+            </div>
+        </div>
+
+        
+
+    
+    
+
+
+
+
+<footer class="footer">
+    <div class="row middle-xs">
+        
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <p class="footer__copyright">
+    All content copyright Pankaj Kumar Rawat.<br>
+    Code under <a href="//github.com/coogie/oscailte/blob/master/README.md">MIT Licence</a>.
+</p>
+
+        </div>
+        
+        
+    </div>
+</footer>
+
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="//crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+<script defer src="/javascripts/octopress.js"></script>
+
+
+<script>
+    var _gaq=[['_setAccount','UA-66794290-1'],['_trackPageview']];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+    s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+
+
+<script>
+    var disqus_shortname = 'pkrawat1';
+    
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pkrawat1.github.io/blogs/blog/2016/06/18/rails-caching-and-active-record-extensions/';
+        var disqus_url = 'http://pkrawat1.github.io/blogs/blog/2016/06/18/rails-caching-and-active-record-extensions/';
+        var disqus_script = 'embed.js';
+    
+    (function () {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+<script>
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'pkrawat1',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+</script>
+<script src="/javascripts/github.js"></script>
+
+
+
+
+
+
+
+    </body>
+
+</html>
