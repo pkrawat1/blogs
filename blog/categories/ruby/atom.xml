@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+    <title><![CDATA[Category: ruby | Just Curiosity]]></title>
+    <link href="http://pkrawat1.github.io/blog/categories/ruby/atom.xml" rel="self"/>
+    <link href="http://pkrawat1.github.io/"/>
+    <updated>2016-11-22T11:13:28+05:30</updated>
+    <id>http://pkrawat1.github.io/</id>
+    <author>
+        <name><![CDATA[Pankaj Kumar Rawat]]></name>
+        <email><![CDATA[pankajrawat19sept@gmail.com]]></email>
+      </author>
+    <generator uri="http://octopress.org/">Octopress</generator>
+
+    
+    <entry>
+        <title type="html"><![CDATA[Tussle of the State Machines]]></title>
+        <link href="http://pkrawat1.github.io/blog/2014/11/15/tussle-of-the-state-machines/"/>
+        <updated>2014-11-15T14:30:44+05:30</updated>
+        <id>http://pkrawat1.github.io/blog/2014/11/15/tussle-of-the-state-machines</id>
+        <content type="html"><![CDATA[<p>There&rsquo;s no shortage of Ruby state machine libraries, but when we needed to implement a formal state machine we don&rsquo;t find one which met all of our requirements.</p>
+
+<p>I had a same problem in my project.What i needed was a polymorphic class that could have multiple number of state machines in it.
+Depending on the the relation the appropriate state machine should be used.</p>
+
+<h3>What i Wanted</h3>
+
+<pre><code class="ruby call.rb">class Call
+  include Mongoid::Document
+  field :scheduled_at,          type: DateTime
+  field :is_existing_customer,  type: Boolean
+  field :note
+
+  belongs_to :callable, polymorphic: true
+  case callable_type
+    when 'Car'
+      state_machine :state, :initial =&gt; :fresh, namespace: 'car' do
+        event :schedule do
+          transition [:fresh, :schedule] =&gt; :scheduled
+        end
+        .....
+        .....
+      end
+    when 'Personal'
+       state_machine :state, :initial =&gt; :fresh, namespace: 'Personal' do
+        event :schedule do
+          transition :fresh =&gt; :scheduled
+        end
+        .....
+        .....
+      end
+     when 'any other'
+      .....
+  end
+end
+</code></pre>
+
+<h1>The Main Problem</h1>
+
+<p>Since AASM State Machine does not supports multiple state machine in a single class. So i tried to achive it through state_machine gem with namespaces
+BUT AGAIN we can not have same states under namespaced state machine in a single class.</p>
+
+<h1>How to do it?</h1>
+
+<p>My basic requirement was to have a state machine that should be easily composable with other Ruby objects.So what i need to do was to define a state machine as a separate class and selectively apply itto our Rails models.
+since Mongodb supports embeded obects. I could use it to store states in it.</p>
+
+<h2>The Solution</h2>
+
+<p>We wanted a state machine that could be easily integrated with other Ruby objects. So we decided to define a state machine as a separate class and selectively apply it to our Rails models. We were using MongoDB, so we embedded these objects.</p>
+
+<pre><code class="ruby car_state_machine.rb">class CarStateMachine
+  include Mongoid::Document
+
+  field :state
+  embedded_in :call
+
+  # no need for name space and we can use AASM directly
+  state_machine :state, :initial =&gt; :fresh do
+    #states: fresh, scheduled, lead, succeed
+    event :schedule do
+      transition [:fresh, :schedule] =&gt; :scheduled
+    end
+    #...
+    #...
+  end
+end
+</code></pre>
+
+<pre><code class="ruby personal_state_machine.rb">class PersonalStateMachine
+  include Mongoid::Document
+  include AASM
+
+  field :state
+  embedded_in :call
+
+  #states: hello, meet, bye
+  state_machine :state, :initial =&gt; :hello do
+    event :wow do
+      transition :hello =&gt; :meet
+    end
+    #...
+    #...
+  end
+end
+</code></pre>
+
+<h3>My Call class now</h3>
+
+<p>So to call access these embedded objects i defined a method call_state that returns the embedded on the basis of the callable_type of Call Class.
+<figure class='code'><figcaption><span>call.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Call</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">Document</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  field :scheduled_at, type: DateTime</span>
+</span><span class='line'><span class="sr">  field :is_existing_customer, type: Boolean</span>
+</span><span class='line'><span class="sr">  field :note</span>
+</span><span class='line'><span class="sr">  field :callable_type&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="n">embeds_one</span> <span class="ss">:car_state_machine</span>
+</span><span class='line'>  <span class="n">embeds_one</span> <span class="ss">:personal_state_machine</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  # Method to access state machine</span>
+</span><span class='line'><span class="sr">  def call_state</span>
+</span><span class='line'><span class="sr">    case self.callable_type</span>
+</span><span class='line'><span class="sr">    when &amp;lsquo;Car&amp;rsquo;</span>
+</span><span class='line'><span class="sr">      self.car_state_machine || self.build_car_state_machine</span>
+</span><span class='line'><span class="sr">    when &amp;lsquo;Personal&amp;rsquo;</span>
+</span><span class='line'><span class="sr">      self.personal_state_machine || self.build_personal_state_machine</span>
+</span><span class='line'><span class="sr">    end</span>
+</span><span class='line'><span class="sr">  end</span>
+</span><span class='line'><span class="sr">end&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">Example</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;call = Call.first.callable_type # =&gt; &amp;ldquo;Car&amp;rdquo;</span>
+</span><span class='line'><span class="sr">call.call_state.state # =&gt; &amp;lsquo;fresh&amp;rsquo;</span>
+</span><span class='line'><span class="sr">call.call_state.schedule!</span>
+</span><span class='line'><span class="sr">call.call_state.state # =&gt; &amp;lsquo;scheduled&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h4</span><span class="o">&gt;</span><span class="c1">#&lt;/h4&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">call</span> <span class="o">=</span> <span class="no">Call</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">callable_type</span> <span class="c1"># =&gt; &amp;ldquo;Personal&amp;rdquo;</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">state</span> <span class="c1"># =&gt; &amp;lsquo;hello&amp;rsquo;</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">wow!</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">state</span> <span class="c1"># =&gt; &amp;lsquo;meet&amp;rsquo;</span>
+</span></code></pre></td></tr></table></div></figure></p>
+]]></content>
+    </entry>
+    
+</feed>

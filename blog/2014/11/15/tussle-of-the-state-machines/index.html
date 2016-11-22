@@ -1,0 +1,569 @@
+<!doctype html>
+    <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+    <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+    <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+    <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+
+    
+      
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Tussle of the State Machines - Just Curiosity</title>
+        <meta name="author" content="Pankaj Kumar Rawat">
+        
+        <meta name="description" content="Tussle of the State Machines Nov 15th, 2014 ruby rails There&rsquo;s no shortage of Ruby state machine libraries, but when we needed to implement a &hellip;">
+        
+        <meta name="viewport" content="width=device-width">
+        <link rel="canonical" href="http://pkrawat1.github.io/blog/2014/11/15/tussle-of-the-state-machines">
+
+        <link href='http://fonts.googleapis.com/css?family=Droid+Serif:400,400italic' rel='stylesheet' type='text/css'>
+        <link href="http://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet" type="text/css">
+
+        
+        <link href="/favicon.png" rel="icon">
+        <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet">
+        <link href="/atom.xml" rel="alternate" title="Just Curiosity" type="application/atom+xml">
+    </head>
+
+
+    <body >
+
+        <header id="header">
+    <div class="row">
+    <div class="col-xs-12 col-sm-8 col-md-4">
+        <a href="/" class="site-title">Just Curiosity</a>
+    </div>
+    <div class="col-xs-12 col-sm-4 col-md-8">
+        <nav>
+    <input type="checkbox" id="toggle">
+    <label for="toggle" class="toggle" data-open="Main Menu" data-close="Close Menu"></label>
+    <ul class="menu">
+    <li><a href="/">Home</a></li>
+    <li><a href="/blog/">Blog</a></li>
+</ul>
+
+</nav>
+
+    </div>
+</div>
+
+</header>
+
+
+        <div id="main-content">
+
+            <!--[if lte IE 9]>
+<div class="row upgrade-row">
+    <div class="col-lg-12">
+        <div class="upgrade">
+            <i class="upgrade__icon fa fa-warning"></i>
+            <h1 class="upgrade__title h6">Ohnoes!</h1>
+            <p class="upgrade__text">
+                Unfortunately, certain parts of this site may not display correctly in your version of Internet Explorer!<br>
+                If possible, you should consider <a href="http://browsehappy.com/">upgrading your browser</a>.
+            </p>
+        </div>
+    </div>
+</div>
+<!-- <![endif]-->
+
+
+            
+
+            <div class="row top-xs center-sm center-md center-lg site-wrapper">
+                
+                <div class="col-xs-12 col-sm-10 col-md-8 col-lg-8">
+                
+                    <article class="article article--single">
+    <header class="article__header">
+    
+        <h1 class="article__title">Tussle of the State Machines</h1>
+    
+
+    
+        <div class="article__meta clearfix">
+            
+
+
+
+
+
+
+    <time class="article__date pull-left" datetime="2014-11-15T14:30:44+05:30" pubdate><i class="fa fa-calendar"></i> Nov 15th, 2014</time>
+
+
+
+
+            
+
+    <div class="article__tags pull-left">
+        <i class="fa fa-tags"></i>
+        <ul class="unstyled">
+        
+
+            
+                <li><a class='category' href='/blog/categories/ruby/'>ruby</a></li>
+            
+                <li><a class='category' href='/blog/categories/rails/'>rails</a></li>
+            
+        
+        </ul>
+    </div>
+
+
+            
+        </div>
+    
+</header>
+
+
+
+
+    <p>There&rsquo;s no shortage of Ruby state machine libraries, but when we needed to implement a formal state machine we don&rsquo;t find one which met all of our requirements.</p>
+
+<p>I had a same problem in my project.What i needed was a polymorphic class that could have multiple number of state machines in it.
+Depending on the the relation the appropriate state machine should be used.</p>
+
+<h3>What i Wanted</h3>
+
+<figure class='code'><figcaption><span>call.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Call</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">Document</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:scheduled_at</span><span class="p">,</span>          <span class="ss">type</span><span class="p">:</span> <span class="no">DateTime</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:is_existing_customer</span><span class="p">,</span>  <span class="ss">type</span><span class="p">:</span> <span class="no">Boolean</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:note</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:callable</span><span class="p">,</span> <span class="ss">polymorphic</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="k">case</span> <span class="n">callable_type</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Car&#39;</span>
+</span><span class='line'>      <span class="n">state_machine</span> <span class="ss">:state</span><span class="p">,</span> <span class="ss">:initial</span> <span class="o">=&gt;</span> <span class="ss">:fresh</span><span class="p">,</span> <span class="ss">namespace</span><span class="p">:</span> <span class="s1">&#39;car&#39;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">event</span> <span class="ss">:schedule</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">transition</span> <span class="o">[</span><span class="ss">:fresh</span><span class="p">,</span> <span class="ss">:schedule</span><span class="o">]</span> <span class="o">=&gt;</span> <span class="ss">:scheduled</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>        <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Personal&#39;</span>
+</span><span class='line'>       <span class="n">state_machine</span> <span class="ss">:state</span><span class="p">,</span> <span class="ss">:initial</span> <span class="o">=&gt;</span> <span class="ss">:fresh</span><span class="p">,</span> <span class="ss">namespace</span><span class="p">:</span> <span class="s1">&#39;Personal&#39;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">event</span> <span class="ss">:schedule</span> <span class="k">do</span>
+</span><span class='line'>          <span class="n">transition</span> <span class="ss">:fresh</span> <span class="o">=&gt;</span> <span class="ss">:scheduled</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>        <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>        <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>     <span class="k">when</span> <span class="s1">&#39;any other&#39;</span>
+</span><span class='line'>      <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>The Main Problem</h1>
+
+<p>Since AASM State Machine does not supports multiple state machine in a single class. So i tried to achive it through state_machine gem with namespaces
+BUT AGAIN we can not have same states under namespaced state machine in a single class.</p>
+
+<h1>How to do it?</h1>
+
+<p>My basic requirement was to have a state machine that should be easily composable with other Ruby objects.So what i need to do was to define a state machine as a separate class and selectively apply itto our Rails models.
+since Mongodb supports embeded obects. I could use it to store states in it.</p>
+
+<h2>The Solution</h2>
+
+<p>We wanted a state machine that could be easily integrated with other Ruby objects. So we decided to define a state machine as a separate class and selectively apply it to our Rails models. We were using MongoDB, so we embedded these objects.</p>
+
+<figure class='code'><figcaption><span>car_state_machine.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CarStateMachine</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">Document</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:state</span>
+</span><span class='line'>  <span class="n">embedded_in</span> <span class="ss">:call</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># no need for name space and we can use AASM directly</span>
+</span><span class='line'>  <span class="n">state_machine</span> <span class="ss">:state</span><span class="p">,</span> <span class="ss">:initial</span> <span class="o">=&gt;</span> <span class="ss">:fresh</span> <span class="k">do</span>
+</span><span class='line'>    <span class="c1">#states: fresh, scheduled, lead, succeed</span>
+</span><span class='line'>    <span class="n">event</span> <span class="ss">:schedule</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">transition</span> <span class="o">[</span><span class="ss">:fresh</span><span class="p">,</span> <span class="ss">:schedule</span><span class="o">]</span> <span class="o">=&gt;</span> <span class="ss">:scheduled</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="c1">#...</span>
+</span><span class='line'>    <span class="c1">#...</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span>personal_state_machine.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PersonalStateMachine</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">Document</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">AASM</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:state</span>
+</span><span class='line'>  <span class="n">embedded_in</span> <span class="ss">:call</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#states: hello, meet, bye</span>
+</span><span class='line'>  <span class="n">state_machine</span> <span class="ss">:state</span><span class="p">,</span> <span class="ss">:initial</span> <span class="o">=&gt;</span> <span class="ss">:hello</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">event</span> <span class="ss">:wow</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">transition</span> <span class="ss">:hello</span> <span class="o">=&gt;</span> <span class="ss">:meet</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="c1">#...</span>
+</span><span class='line'>    <span class="c1">#...</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>My Call class now</h3>
+
+<p>So to call access these embedded objects i defined a method call_state that returns the embedded on the basis of the callable_type of Call Class.</p>
+
+<figure class='code'><figcaption><span>call.rb</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Call</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Mongoid</span><span class="o">::</span><span class="no">Document</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:scheduled_at</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="no">DateTime</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:is_existing_customer</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="no">Boolean</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:note</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:callable_type</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">embeds_one</span> <span class="ss">:car_state_machine</span>
+</span><span class='line'>  <span class="n">embeds_one</span> <span class="ss">:personal_state_machine</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Method to access state machine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">call_state</span>
+</span><span class='line'>    <span class="k">case</span> <span class="nb">self</span><span class="o">.</span><span class="n">callable_type</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Car&#39;</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">car_state_machine</span> <span class="o">||</span> <span class="nb">self</span><span class="o">.</span><span class="n">build_car_state_machine</span>
+</span><span class='line'>    <span class="k">when</span> <span class="s1">&#39;Personal&#39;</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">personal_state_machine</span> <span class="o">||</span> <span class="nb">self</span><span class="o">.</span><span class="n">build_personal_state_machine</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Example</span>
+</span><span class='line'><span class="n">call</span> <span class="o">=</span> <span class="no">Call</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">callable_type</span> <span class="c1"># =&gt; &quot;Car&quot;</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">state</span> <span class="c1"># =&gt; &#39;fresh&#39;</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">schedule!</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">state</span> <span class="c1"># =&gt; &#39;scheduled&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#####</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">call</span> <span class="o">=</span> <span class="no">Call</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">callable_type</span> <span class="c1"># =&gt; &quot;Personal&quot;</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">state</span> <span class="c1"># =&gt; &#39;hello&#39;</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">wow!</span>
+</span><span class='line'><span class="n">call</span><span class="o">.</span><span class="n">call_state</span><span class="o">.</span><span class="n">state</span> <span class="c1"># =&gt; &#39;meet&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+</article>
+
+
+<section id="disqus">
+    <h1 class="disqus__title">Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+
+
+                </div>
+
+                
+                <aside class="sidebar col-xs-12 col-md-4 col-lg-4">
+                    <div class="row">
+
+    
+        <section class="hire--aside col-xs-12 col-sm-10 col-md-12">
+            
+    
+
+
+
+    
+
+
+
+
+<div class="hire hire--available">
+    <a class="hire__link" href="mailto:pankajrawat19sept@gmail.com?subject=New%20job%20opportunity">
+        Available for new opportunities
+    </a>
+</div>
+
+
+        </section>
+    
+
+    
+<section class="social col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        Follow me!
+    </h1>
+    <ul class="unstyled">
+        
+        
+        
+        <li><a class="facebook" href="//facebook.com/pkrawat1"><i class="fa fa-facebook-square"></i> Facebook</a></li>
+        <li><a class="github" href="//github.com/pkrawat1"><i class="fa fa-github"></i> Github</a></li>
+        <li><a class="googleplus" href="//plus.google.com/+PankajRawat"><i class="fa fa-google-plus-square"></i> Google+</a></li>
+        
+        
+        <li><a class="linkedin" href="//linkedin.com/in/pkrawat1"><i class="fa fa-linkedin-square"></i> LinkedIn</a></li>
+        
+        
+        <li><a class="stackoverflow" href="//stackoverflow.com/users/2481868"><i class="fa fa-stack-overflow"></i> StackOverflow</a></li>
+        <li><a class="twitter" href="//twitter.com/pkrawat1"><i class="fa fa-twitter"></i> Twitter</a></li>
+        
+    </ul>
+</section>
+
+
+
+    <section id="recent-posts" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>Recent Posts</h1>
+    <ul class="divided">
+        
+        <li class="post">
+            <a href="/blog/2016/06/18/rails-caching-and-active-record-extensions/">Rails Caching and Active Record Extensions</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2015/08/25/todoapp-in-angular2-with-typescript/">TodoApp in Angular2 with TypeScript</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2014/12/06/javascript-back-to-basics-part-1/">Javascript Back to Basics part 1</a>
+        </li>
+        
+        <li class="post">
+            <a href="/blog/2014/11/15/tussle-of-the-state-machines/">Tussle of the State Machines</a>
+        </li>
+        
+    </ul>
+</section>
+
+<section id="twitter-timeline" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        Latest Tweets
+        
+        <small class="pull-right">
+            <a class="btn" href="//twitter.com/pkrawat1" title="@pkrawat1 on Twitter" target="_blank">
+                <i class="fa fa-external-link"></i>
+            </a>
+        </small>
+        
+    </h1>
+
+    <a class="twitter-timeline" data-dnt="true" href="//twitter.com/pkrawat1"  data-widget-id="636473342652878848"  data-link-color="#049cdb" data-tweet-limit="" data-chrome="noheader nofooter transparent noscrollbar">Tweets by @pkrawat1</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</section>
+
+
+<section id="github-repos" class="col-xs-12 col-sm-6 col-md-12">
+    <h1>
+        GitHub Repos
+        
+        <small class="pull-right">
+            <a class="btn" href="//github.com/pkrawat1" title="@pkrawat1 on GitHub" target="_blank">
+                <i class="fa fa-external-link"></i>
+            </a>
+        </small>
+        
+    </h1>
+    <ul id="gh_repos" class="divided">
+        <li class="loading">
+            <i class="fa fa-spinner fa-spin"></i>
+        </li>
+    </ul>
+</section>
+
+
+
+
+
+
+</div>
+
+                </aside>
+                
+            </div>
+        </div>
+
+        
+
+    
+    
+
+
+
+
+<footer class="footer">
+    <div class="row middle-xs">
+        
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <p class="footer__copyright">
+    All content copyright Pankaj Kumar Rawat.<br>
+    Code under <a href="//github.com/coogie/oscailte/blob/master/README.md">MIT Licence</a>.
+</p>
+
+        </div>
+        
+        
+    </div>
+</footer>
+
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script src="//crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+<script defer src="/javascripts/octopress.js"></script>
+
+
+<script>
+    var _gaq=[['_setAccount','UA-66794290-1'],['_trackPageview']];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+    s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+
+
+<script>
+    var disqus_shortname = 'pkrawat1';
+    
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://pkrawat1.github.io/blog/2014/11/15/tussle-of-the-state-machines/';
+        var disqus_url = 'http://pkrawat1.github.io/blog/2014/11/15/tussle-of-the-state-machines/';
+        var disqus_script = 'embed.js';
+    
+    (function () {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+<script>
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'pkrawat1',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+</script>
+<script src="/javascripts/github.js"></script>
+
+
+
+
+
+
+
+    </body>
+
+</html>
